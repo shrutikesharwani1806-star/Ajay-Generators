@@ -21,6 +21,8 @@ export default function AdminDashboard() {
   const [quotes, setQuotes] = useState([]);
   const [chats, setChats] = useState([]);
   const [showAddGen, setShowAddGen] = useState(false);
+  const [editingPriceGen, setEditingPriceGen] = useState(null);
+  const [newPrice, setNewPrice] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedChat, setSelectedChat] = useState(null);
   const [adminMsg, setAdminMsg] = useState('');
@@ -106,6 +108,17 @@ export default function AdminDashboard() {
   const deleteGen = async (id) => {
     if (!confirm('Delete this generator?')) return;
     try { await API.delete(`/generators/${id}`); toast.success('Deleted'); fetchData(); } catch { toast.error('Failed'); }
+  };
+
+  const updatePrice = async (id, currentPricing) => {
+    if (!newPrice || isNaN(newPrice)) { toast.error('Enter a valid price'); return; }
+    try {
+      await API.put(`/generators/${id}`, { pricing: { ...currentPricing, daily: Number(newPrice) } });
+      toast.success('Price updated');
+      setEditingPriceGen(null);
+      setNewPrice('');
+      fetchData();
+    } catch { toast.error('Failed to update price'); }
   };
 
   const sendAdminReply = async () => {
@@ -341,8 +354,22 @@ export default function AdminDashboard() {
                   </div>
                   <p style={{ fontFamily: 'var(--font-inter)', fontSize: 'clamp(0.75rem,0.82vw,0.88rem)', color: '#6B7B8D', marginBottom: '1vh' }}>{g.description?.slice(0, 80)}...</p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '1vh' }}>
-                    <p style={{ fontFamily: 'var(--font-poppins)', fontWeight: 700, color: '#D4841C', margin: 0 }}>₹{g.pricing?.daily?.toLocaleString()}<span style={{ fontSize: '0.5em', color: '#6B7B8D', fontWeight: 400 }}>/day</span></p>
-                    <button onClick={() => deleteGen(g._id)} style={{ background: 'rgba(239,68,68,0.1)', border: 'none', color: '#ef4444', padding: '0.4rem', borderRadius: '0.4rem', cursor: 'pointer' }}><BsTrashFill /></button>
+                    {editingPriceGen === g._id ? (
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <span style={{ color: '#D4841C', fontFamily: 'var(--font-poppins)', fontWeight: 700 }}>₹</span>
+                        <input type="number" autoFocus value={newPrice} onChange={(e) => setNewPrice(e.target.value)} style={{ ...IStyle, width: '80px', padding: '0.2rem 0.5rem', fontSize: '0.9rem' }} />
+                        <button onClick={() => updatePrice(g._id, g.pricing)} style={{ background: 'rgba(16,185,129,0.1)', border: 'none', color: '#10b981', padding: '0.4rem', borderRadius: '0.4rem', cursor: 'pointer' }}><BsCheckCircleFill /></button>
+                        <button onClick={() => { setEditingPriceGen(null); setNewPrice(''); }} style={{ background: 'rgba(239,68,68,0.1)', border: 'none', color: '#ef4444', padding: '0.4rem', borderRadius: '0.4rem', cursor: 'pointer' }}><BsXCircleFill /></button>
+                      </div>
+                    ) : (
+                      <p style={{ fontFamily: 'var(--font-poppins)', fontWeight: 700, color: '#D4841C', margin: 0 }}>₹{g.pricing?.daily?.toLocaleString()}<span style={{ fontSize: '0.5em', color: '#6B7B8D', fontWeight: 400 }}>/day</span></p>
+                    )}
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {editingPriceGen !== g._id && (
+                        <button onClick={() => { setEditingPriceGen(g._id); setNewPrice(g.pricing?.daily || ''); }} style={{ background: 'rgba(59,130,246,0.1)', border: 'none', color: '#3b82f6', padding: '0.4rem', borderRadius: '0.4rem', cursor: 'pointer' }}><BsPencilFill /></button>
+                      )}
+                      <button onClick={() => deleteGen(g._id)} style={{ background: 'rgba(239,68,68,0.1)', border: 'none', color: '#ef4444', padding: '0.4rem', borderRadius: '0.4rem', cursor: 'pointer' }}><BsTrashFill /></button>
+                    </div>
                   </div>
                 </div>
               ))}

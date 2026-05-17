@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { BsLightningChargeFill, BsEye, BsEyeSlash } from 'react-icons/bs';
 import toast from 'react-hot-toast';
-import LampAnimation from '@/components/LampAnimation';
+import GeneratorLoader from '@/components/GeneratorLoader';
 
 export default function LoginPage() {
   const { login, user, loading: authLoading } = useAuth();
@@ -50,7 +50,7 @@ export default function LoginPage() {
             <p className="text-accent font-poppins font-bold text-sm uppercase tracking-widest mb-1">Powering Up</p>
             <h3 className="text-white font-poppins font-bold text-xl">Ajay Generators</h3>
           </div>
-          <LampAnimation isLit={isInputFocused || loading} isTyping={isTyping} />
+          <GeneratorLoader isLit={isInputFocused || loading} isTyping={isTyping} />
         </motion.div>
 
         {/* Form Side */}
@@ -59,7 +59,7 @@ export default function LoginPage() {
           
           {/* Mobile Animation */}
           <div className="lg:hidden flex justify-center mb-6 scale-75 h-32">
-            <LampAnimation isLit={isInputFocused || loading} isTyping={isTyping} />
+            <GeneratorLoader isLit={isInputFocused || loading} isTyping={isTyping} />
           </div>
 
           <div className="text-center mb-[3vh]">
